@@ -1,10 +1,7 @@
-VERSION = 14.0.4
-NAME = mongrelion/oh-my-pi:$(VERSION)
+NAME = mongrelion/oh-my-pi:latest
 
 build:
-	docker build \
-		--build-arg VERSION=$(VERSION) \
-		-t $(NAME) .
+	docker build -t $(NAME) .
 
 run:
 	docker run \
