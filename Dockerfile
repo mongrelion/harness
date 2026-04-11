@@ -1,7 +1,9 @@
 FROM debian:13-slim
 
-ARG VERSION=latest
 ARG UV_VERSION=0.11.6
+ARG OMP_VERSION=latest
+ARG PI_VERSION=latest
+ARG OPENCODE_VERSION=latest
 
 # Install dependencies
 RUN apt-get update && \
@@ -18,8 +20,17 @@ RUN apt-get update && \
     python3-venv \
     jq \
     golang \
+    make \
     && ln -s /usr/bin/fdfind /usr/bin/fd \
     && rm -rf /var/lib/apt/lists/*
+
+# Install asdf
+RUN cd /tmp && \
+    curl -L https://github.com/asdf-vm/asdf/releases/download/v0.18.1/asdf-v0.18.1-linux-amd64.tar.gz -o asdf.tar.gz && \
+    tar -xzf asdf.tar.gz && \
+    rm asdf.tar.gz && \
+    chmod +x asdf && \
+    mv asdf /usr/bin
 
 # Set up bun environment
 # Download and install bun directly
@@ -45,8 +56,16 @@ RUN useradd -m coder
 
 USER coder
 
-RUN bun install -g @oh-my-pi/pi-coding-agent@${VERSION}
+RUN bun install -g @oh-my-pi/pi-coding-agent@${OMP_VERSION}
+
+RUN bun install -g @mariozechner/pi-coding-agent@${PI_VERSION}
+
+RUN bun add -g opencode-ai@${OPENCODE_VERSION}
+
+USER root
 
 ENV PATH="/home/coder/.bun/bin:$PATH"
 
-ENTRYPOINT ["omp"]
+WORKDIR /home/coder
+
+ENTRYPOINT ["bash"]

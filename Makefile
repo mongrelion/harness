@@ -1,4 +1,4 @@
-NAME = mongrelion/oh-my-pi:latest
+NAME = mongrelion/harness:latest
 
 build:
 	docker build -t $(NAME) .
@@ -6,4 +6,5 @@ build:
 run:
 	docker run \
 		--rm \
+		--user 1000:1000 \
 		-it $(NAME)
