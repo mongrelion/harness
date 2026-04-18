@@ -2,14 +2,14 @@ name: Build and Push
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Resolve latest version
         id: version
@@ -20,12 +20,12 @@ jobs:
       - name: Check if image already exists
         id: check
         run: |
-          if docker manifest inspect mongrelion/oh-my-pi:${{ steps.version.outputs.version }} > /dev/null 2>&1; then
+          if docker manifest inspect mongrelion/harness:${{ steps.version.outputs.version }} > /dev/null 2>&1; then
             echo "exists=true" >> "$GITHUB_OUTPUT"
-            echo "Image mongrelion/oh-my-pi:${{ steps.version.outputs.version }} already exists, skipping build."
+            echo "Image mongrelion/harness:${{ steps.version.outputs.version }} already exists, skipping build."
           else
             echo "exists=false" >> "$GITHUB_OUTPUT"
-            echo "Image mongrelion/oh-my-pi:${{ steps.version.outputs.version }} not found, will build."
+            echo "Image mongrelion/harness:${{ steps.version.outputs.version }} not found, will build."
           fi
 
       - name: Login to Docker Hub
@@ -37,15 +37,15 @@ jobs:
 
       - name: Set up Docker Buildx
         if: steps.check.outputs.exists == 'false'
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Build and push
         if: steps.check.outputs.exists == 'false'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: true
           tags: |
-            mongrelion/oh-my-pi:latest
-            mongrelion/oh-my-pi:${{ steps.version.outputs.version }}
+            mongrelion/harness:latest
+            mongrelion/harness:${{ steps.version.outputs.version }}
           build-args: VERSION=${{ steps.version.outputs.version }}
